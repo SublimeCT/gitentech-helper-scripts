@@ -1,7 +1,10 @@
 import { Application } from "./Application";
+import { CourseModule } from "./modules/Course";
 import { TestModule } from "./modules/Test";
 
-Application.use(new TestModule())
+Application
+  .use(new TestModule())
+  .use(new CourseModule())
 
 const application = new Application()
 

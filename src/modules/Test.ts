@@ -10,7 +10,7 @@ export class TestModule implements ApplicationModule {
     return Object.values(viewData).every(v => v.length === 0)
   }
   async onLoad() {
-    if (!checkRoute('/testPage', this.page)) return
+    if (!checkRoute('/testPage', this.page)) return this.unMounted
     const el = await waitForElement('.box') as any
     this.component = await waitFor(() => {
       if (el.__vue__ && el.__vue__.formData && el.__vue__.viewData && !this.viewDataIsEmpty(el.__vue__.viewData)) return el.__vue__
@@ -19,6 +19,9 @@ export class TestModule implements ApplicationModule {
   }
   routeChange(): void {
     this.onLoad()
+  }
+  unMounted(): void {
+    this.component = null
   }
   private correctAnswerToValue(correctAnswer: string) {
     return correctAnswer.split(',').map(a => a.replace(/[\[\]]/g, '')).toString()

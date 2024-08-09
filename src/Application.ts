@@ -21,6 +21,8 @@ export interface ApplicationHooks {
 export interface ApplicationModule extends ApplicationHooks {
   /** 当前模块应用的页面 */
   page: Pages
+  /** 适用于 vue SPA 页面, 销毁当前引用的元素, 避免内存泄露 */
+  unMounted?(): void
 }
 
 export class Application {

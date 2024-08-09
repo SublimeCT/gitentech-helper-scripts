@@ -10,3 +10,4 @@ const application = new Application()
 
 application.emit('onInit')
 application.onLoad()
+application.listenVueRouteChange()

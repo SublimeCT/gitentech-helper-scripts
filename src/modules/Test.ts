@@ -1,20 +1,24 @@
 import { ApplicationModule } from "../Application";
 import { Pages } from "../Pages";
+import { checkRoute } from "../utils/route";
 import { waitForElement, waitFor, delay } from '../utils/wait'
 
 export class TestModule implements ApplicationModule {
-  page = Pages.test;
+  page = Pages.ilearn;
   component: any = null
   private viewDataIsEmpty(viewData: Record<string, Array<object>>) {
     return Object.values(viewData).every(v => v.length === 0)
   }
   async onLoad() {
+    if (!checkRoute('/testPage', this.page)) return
     const el = await waitForElement('.box') as any
     this.component = await waitFor(() => {
       if (el.__vue__ && el.__vue__.formData && el.__vue__.viewData && !this.viewDataIsEmpty(el.__vue__.viewData)) return el.__vue__
     })
-    console.warn('test onLoad', this.component)
     this.fillAnswer()
+  }
+  routeChange(): void {
+    this.onLoad()
   }
   private correctAnswerToValue(correctAnswer: string) {
     return correctAnswer.split(',').map(a => a.replace(/[\[\]]/g, '')).toString()
@@ -38,7 +42,6 @@ export class TestModule implements ApplicationModule {
       const optionLabelElements = Array.from(questionEl.querySelectorAll('label'))
       if (optionLabelElements.length) {
         const answerIndexs = this.answerValueToIndex(question.value)
-        console.warn('question', question.value)
         for (const i of answerIndexs) {
           optionLabelElements[i] && optionLabelElements[i].click()
           await delay(300)

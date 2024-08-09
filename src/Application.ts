@@ -1,10 +1,21 @@
 import { Pages, PagesInfoMap } from "./Pages"
+import { waitFor, waitForElement } from "./utils/wait"
+
+export interface VueRoute {
+  path: string,
+  name: string,
+  meta: {
+    title: string
+  }
+}
 
 export interface ApplicationHooks {
   /** page onLoad */
   onLoad?(): void
   /** 脚本初始化 */
   onInit?(): void
+  /** 监听路由变化, 需要指定的 `Pages` 是标准的 `vue SPA` 页面 */
+  routeChange?(to: VueRoute, from: VueRoute): void
 }
 
 export interface ApplicationModule extends ApplicationHooks {
@@ -27,6 +38,17 @@ export class Application {
     } else {
       this.emit('onLoad')
     }
+  }
+
+  /** 检测当前页面是否是 vue SPA 页面, 监听路由变化并触发 routeChange 钩子 */
+  async listenVueRouteChange() {
+    const app = await waitForElement('#app') as any
+    if (!app) return
+    const appInstance = await waitFor(() => app?.__vue__)
+    if (!appInstance) return
+    appInstance.$router.afterEach((to: VueRoute, from: VueRoute) => {
+      this.emit('routeChange', to, from)
+    })
   }
 
   /** 判断当前页面是否匹配当前模块 */

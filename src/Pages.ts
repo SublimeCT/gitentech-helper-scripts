@@ -1,8 +1,6 @@
 export enum Pages {
-  /** 答题 */
-  test,
   /** 课程 */
-  course,
+  ilearn,
   /** 工时 */
   timesheet,
 }
@@ -13,13 +11,9 @@ export interface PagesInfo {
 }
 
 export const PagesInfoMap: Record<Pages, PagesInfo> = {
-  [Pages.test]: {
-    name: '答题',
-    pattern: /^https:\/\/ilearn\.gientech\.com\/testPage.*/,
-  },
-  [Pages.course]: {
-    name: '课程',
-    pattern: /^https:\/\/ilearn\.gientech\.com\/courseMain.*/,
+  [Pages.ilearn]: {
+    name: 'iLearn(课程/考试)',
+    pattern: /^https:\/\/ilearn\.gientech\.com.*/,
   },
   [Pages.timesheet]: {
     name: '工时',

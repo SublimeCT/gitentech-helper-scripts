@@ -1,5 +1,6 @@
 import { ApplicationModule } from "../Application";
 import { Pages } from "../Pages";
+import { getCourseIdByURL, getTimeStamp, getToken } from "../utils/fetch";
 import { checkRoute } from "../utils/route";
 import { waitForElement, waitFor, delay } from '../utils/wait'
 
@@ -47,7 +48,7 @@ export class CourseModule implements ApplicationModule {
     const component = this.component
     component._$storage = component.$storage
     /** 课程开始学习时间的偏移量(ms) */
-    const timeOffset = 60 * 60 * 1000
+    const timeOffset = 60 * 90 * 1000
     /** 代理对于 SessionStorage 的访问方法, 当获取到视频总时长时, 减去偏移量, 避免视频播放时, 视频总时长被修改为当前时间 */
     component.$storage = {
       ...component.$storage,
@@ -84,33 +85,32 @@ export class CourseModule implements ApplicationModule {
       // location.reload()
       return courseware
     }
+    component._$httpPost = component.$httpPost
+    component.$httpPost = async function(...args: Array<any>) {
+      if (!args || args.length === 0) return component._$httpPost(...args)
+      const [url, options] = args
+      if (url === this.$httpApi.studyWare.ilearn && options) {
+        const timeStamp = getTimeStamp()
+        options.timeStamp = timeStamp
+        const logData = JSON.parse(atob(options.log))
+        logData.timeStamp = timeStamp
+        logData.currentCoursePlayTime = 60 * 90 * 1000
+        if (Reflect.has(logData, 'lessonStatus')) logData.lessonStatus = 'completed'
+        if (Reflect.has(logData, 'sessionTime')) logData.sessionTime = '01:30:00'
+        options.log = btoa(JSON.stringify(logData))
+        // console.warn('log', options, timeStamp, logData)
+      }
+      return component._$httpPost(...args)
+    }
     component.isVideoPlaying = true
-  }
-  getCourseIdByURL() {
-    const matchRes = location.href.match(/courseId=(\d+)/)
-    const id = matchRes && matchRes[1]
-    if (!id) throw new Error('Missing courseId')
-    return id
-  }
-  getToken() {
-    return JSON.parse(localStorage.getItem('token') || '').value
   }
   /** 继续自动学习其他剩余课程 */
   async continueStudyCourses() {
-    const res = await fetch(`https://ilearn.gientech.com/api/course/getCourseWareList?courseId=${this.getCourseIdByURL()}&t=${Date.now()}`, {
+    const res = await fetch(`https://ilearn.gientech.com/api/course/getCourseWareList?courseId=${getCourseIdByURL()}&t=${Date.now()}`, {
       "headers": {
         "accept": "application/json, text/plain, */*",
-        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
-        "sec-ch-ua": "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"",
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": "\"windows\"",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "sec-gpc": "1",
-        "token": this.getToken()
+        "token": getToken()
       },
-      "referrer": "https://ilearn.gientech.com/",
       "referrerPolicy": "origin",
       "body": null,
       "method": "GET",

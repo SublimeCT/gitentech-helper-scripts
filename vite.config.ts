@@ -32,7 +32,7 @@ export default defineConfig({
         identifierNamesGenerator: 'hexadecimal',
         log: false,
         // 是否启用全局变量和函数名称的混淆
-        renameGlobals: false,
+        renameGlobals: true,
         // 通过固定和随机（在代码混淆时生成）的位置移动数组。这使得将删除的字符串的顺序与其原始位置相匹配变得更加困难。如果原始源代码不小，建议使用此选项，因为辅助函数可以引起注意。
         rotateStringArray: true,
         // 混淆后的代码,不能使用代码美化,同时需要配置 cpmpat:true;
@@ -41,7 +41,7 @@ export default defineConfig({
         stringArray: true,
         stringArrayThreshold: 0.75,
         // 允许启用/禁用字符串转换为unicode转义序列。Unicode转义序列大大增加了代码大小，并且可以轻松地将字符串恢复为原始视图。建议仅对小型源代码启用此选项。
-        unicodeEscapeSequence: false,
+        unicodeEscapeSequence: true,
       }
     }),
   ],

@@ -16,6 +16,7 @@ export class TestModule implements ApplicationModule {
       if (el.__vue__ && el.__vue__.formData && el.__vue__.viewData && !this.viewDataIsEmpty(el.__vue__.viewData)) return el.__vue__
     })
     this.fillAnswer()
+    return undefined
   }
   routeChange(): void {
     this.onLoad()

@@ -5,7 +5,7 @@ import { CourseWare } from "../types/CourseWare";
 import { CourseWareStudy } from "../types/CourseWareStudy";
 import { getCourseIdByURL, getTimeStamp, toFetch } from "../utils/fetch";
 import { checkRoute } from "../utils/route";
-import { waitForElement, waitFor, delay } from '../utils/wait'
+import { waitForElement, delay } from '../utils/wait'
 
 /**
  * 学习模块(仅请求接口)
@@ -94,10 +94,10 @@ export class StudyModule implements ApplicationModule {
       lessonStatus: 'completed',
       timeStamp: t,
     }
-    const res = await toFetch<CourseWareStudy>(`/api/course/studyCourseWare`, {
-      method: 'POST',
-      body: JSON.stringify(params),
-    })
+    // const res = await toFetch<CourseWareStudy>(`/api/course/studyCourseWare`, {
+    //   method: 'POST',
+    //   body: JSON.stringify(params),
+    // })
     return params
   }
   async closeCourseWare(params: object) {

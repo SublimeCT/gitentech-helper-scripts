@@ -16,7 +16,10 @@ export function getToken() {
   return JSON.parse(localStorage.getItem('token') || '').value
 }
 
-export function getTimeStamp(offset: number = 60 * 90 * 1000) {
+/** 默认的时间偏移量 */
+export const defaultTimeOffset = 60 * 90 * 1000
+
+export function getTimeStamp(offset: number = defaultTimeOffset) {
   return Date.now() - offset
 }
 

@@ -1,14 +1,14 @@
 /** 课件类型 */
 export enum CourseWareType {
-  /** 未知, 可能是内部的课件 */
+  /** 未知, ✅, 可能是内部的课件 */
 	html = 'II01',
-  /** 未知 */
-	unkonwn = 'II02',
-  /** 视频 */
+  /** 好像是 PPT, ✅ .e.g courseId=6227 */
+	ppt = 'II02',
+  /** 视频, ✅ */
 	video = 'II03',
   /** PDF */
   pdf = 'II04',
-  /** 链接 */
+  /** 链接, ✅ */
   URL = 'II05',
 }
 

@@ -1,6 +1,6 @@
 import { ApplicationModule } from "../Application";
 import { Pages } from "../Pages";
-import { getCourseIdByURL, getTimeStamp, getToken } from "../utils/fetch";
+import { defaultTimeOffset, getCourseIdByURL, getTimeStamp, getToken } from "../utils/fetch";
 import { checkRoute } from "../utils/route";
 import { waitForElement, waitFor, delay } from '../utils/wait'
 
@@ -48,7 +48,7 @@ export class CourseModule implements ApplicationModule {
     const component = this.component
     component._$storage = component.$storage
     /** 课程开始学习时间的偏移量(ms) */
-    const timeOffset = 60 * 90 * 1000
+    const timeOffset = defaultTimeOffset
     /** 代理对于 SessionStorage 的访问方法, 当获取到视频总时长时, 减去偏移量, 避免视频播放时, 视频总时长被修改为当前时间 */
     component.$storage = {
       ...component.$storage,
@@ -89,16 +89,36 @@ export class CourseModule implements ApplicationModule {
     component.$httpPost = async function(...args: Array<any>) {
       if (!args || args.length === 0) return component._$httpPost(...args)
       const [url, options] = args
+      // 对于非视频课程, 阻止 closeCourseWare 请求
+      if (url === this.$httpApi.studyWare.closeCourseWare && options && options.formatType !== 'II03') {
+        console.warn('not II03, stop close request', options)
+        return Promise.resolve({
+          data: {
+            code: 0,
+            msg: 'success'
+          }
+        })
+      }
       if (url === this.$httpApi.studyWare.ilearn && options) {
-        const timeStamp = getTimeStamp()
-        options.timeStamp = timeStamp
+        const beforeTimeStamp = getTimeStamp()
+        const afterTimeStamp = getTimeStamp(-defaultTimeOffset)
+        options.timeStamp = beforeTimeStamp
         const logData = JSON.parse(atob(options.log))
-        logData.timeStamp = timeStamp
-        logData.currentCoursePlayTime = 60 * 90 * 1000
+        logData.timeStamp = beforeTimeStamp
+        // 对于非视频课程, 将时间改为当前时间之后的时间
+        if (logData.formatType !== 'II03') {
+          logData.timeStamp = afterTimeStamp
+          options.timeStamp = afterTimeStamp
+          logData.currentCoursePlayTime = null
+          console.warn('II04 log', options, logData)
+          setTimeout(() => location.reload(), 1500)
+        }
+        logData.currentCoursePlayTime = defaultTimeOffset
         if (Reflect.has(logData, 'lessonStatus')) logData.lessonStatus = 'completed'
         if (Reflect.has(logData, 'sessionTime')) logData.sessionTime = '01:30:00'
+        
         options.log = btoa(JSON.stringify(logData))
-        // console.warn('log', options, timeStamp, logData)
+        console.warn('log', options, logData)
       }
       return component._$httpPost(...args)
     }

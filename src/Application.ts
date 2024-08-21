@@ -42,6 +42,33 @@ export class Application {
     }
   }
 
+  /** 检测当前页面是否是 angular SPA 页面, 监听路由变化并触发 routeChange 钩子 */
+  async listenAngularRouteChange() {
+    const angular = await waitFor(() => (window as any).angular)
+    if (!angular) return
+
+    // 1. 获取 AngularJS 应用的 injector
+    const appElement = document.querySelector('[ng-app]') || document.body
+    const injector = await waitFor(() => angular.element(appElement).injector())
+
+    if (!injector) throw new Error('angular injector not found')
+
+    // 2. 获取 $rootScope 和 $location 服务
+    const $rootScope = injector.get('$rootScope')
+    // const $location = injector.get('$location')
+
+    // 3. 监听 $locationChangeSuccess 事件
+    $rootScope.$on('$locationChangeSuccess', (_: Event, newUrl: string, oldUrl: string) => {
+      // console.log('Route changed:')
+      // console.log('Old URL:', oldUrl)
+      // console.log('New URL:', newUrl)
+      // console.log('Current path:', $location.path())
+      const toRoute: VueRoute = { path: newUrl, name: newUrl, meta: { title: newUrl } }
+      const fromRoute: VueRoute = { path: oldUrl, name: oldUrl, meta: { title: oldUrl } }
+      this.emit('routeChange', toRoute, fromRoute)
+    })
+  }
+
   /** 检测当前页面是否是 vue SPA 页面, 监听路由变化并触发 routeChange 钩子 */
   async listenVueRouteChange() {
     const app = await waitForElement('#app') as any

@@ -17,6 +17,6 @@ export const PagesInfoMap: Record<Pages, PagesInfo> = {
   },
   [Pages.timesheet]: {
     name: '工时',
-    pattern: /^https:\/\/timesheet\.gientech\.com\/\#\/.*/,
+    pattern: /^https:\/\/timesheet\.gientech\.com\//,
   },
 }

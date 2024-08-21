@@ -48,7 +48,7 @@ export class TestModule implements ApplicationModule {
         const answerIndexs = this.answerValueToIndex(question.value)
         for (const i of answerIndexs) {
           optionLabelElements[i] && optionLabelElements[i].click()
-          await delay(300)
+          await delay(700)
         }
       } else {
         console.error('Missing option label element')

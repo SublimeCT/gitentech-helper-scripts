@@ -10,7 +10,7 @@
 
 ### Use Tampermonkey Extension
 1. Install [Tampermonkey Extension](https://www.tampermonkey.net/index.php)
-2. [Click To Install](https://github.com/SublimeCT/gitentech-helper-scripts/raw/main/dist/gientech-helper-scripts.user.js)
+2. Click to install [this script](https://github.com/SublimeCT/gitentech-helper-scripts/raw/main/dist/gientech-helper-scripts.user.js)
 
 #### Offline installation of Tampermonkey
 

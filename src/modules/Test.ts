@@ -6,11 +6,14 @@ import { waitForElement, waitFor, delay } from '../utils/wait'
 export class TestModule implements ApplicationModule {
   page = Pages.ilearn;
   component: any = null
+  initialized = false
   private viewDataIsEmpty(viewData: Record<string, Array<object>>) {
     return Object.values(viewData).every(v => v.length === 0)
   }
   async onLoad() {
-    if (!checkRoute('/testPage', this.page)) return this.unMounted
+    if (!checkRoute('/testPage', this.page)) return this.unMounted()
+    if (this.initialized) return
+    this.initialized = true
     const el = await waitForElement('.box') as any
     this.component = await waitFor(() => {
       if (el.__vue__ && el.__vue__.formData && el.__vue__.viewData && !this.viewDataIsEmpty(el.__vue__.viewData)) return el.__vue__
@@ -23,6 +26,7 @@ export class TestModule implements ApplicationModule {
   }
   unMounted(): void {
     this.component = null
+    this.initialized = false
   }
   private correctAnswerToValue(correctAnswer: string) {
     return correctAnswer.split(',').map(a => a.replace(/[\[\]]/g, '')).toString()
@@ -48,7 +52,7 @@ export class TestModule implements ApplicationModule {
         const answerIndexs = this.answerValueToIndex(question.value)
         for (const i of answerIndexs) {
           optionLabelElements[i] && optionLabelElements[i].click()
-          await delay(700)
+          await delay(800)
         }
       } else {
         console.error('Missing option label element')

@@ -7,10 +7,13 @@ import { waitForElement, waitFor, delay } from '../utils/wait'
 export class CourseModule implements ApplicationModule {
   page = Pages.ilearn;
   component: any = null
+  initialized = false
   /** 是否点击了开始学习按钮 */
   isClickStudy: boolean = false
   async onLoad() {
     if (!checkRoute('/courseMain', this.page)) return this.unMounted()
+    if (this.initialized) return
+    this.initialized = true
     this.modifyStudyButton()
     const el = await waitForElement('.courseIntroduce.coursewareWrapper.courseMobile > div') as any
     this.component = await waitFor(() => el.__vue__)
@@ -22,6 +25,7 @@ export class CourseModule implements ApplicationModule {
   unMounted() {
     this.component = null
     this.isClickStudy = false
+    this.initialized = false
   }
   async modifyStudyButton() {
     const buttonEl = await waitForElement('.head .rightBtn button')

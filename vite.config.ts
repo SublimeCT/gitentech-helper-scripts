@@ -13,6 +13,7 @@ export default defineConfig({
         namespace: 'gientech.com',
         author: 'xx',
         include: Object.values(PagesInfoMap).map(info => info.pattern),
+        grant: ['unsafeWindow'],
       },
     }),
     obfuscatorPlugin({
@@ -30,7 +31,7 @@ export default defineConfig({
         disableConsoleOutput: true,
         // 标识符的混淆方式 hexadecimal(十六进制) mangled(短标识符)
         identifierNamesGenerator: 'hexadecimal',
-        log: false,
+        log: true,
         // 是否启用全局变量和函数名称的混淆
         renameGlobals: true,
         // 通过固定和随机（在代码混淆时生成）的位置移动数组。这使得将删除的字符串的顺序与其原始位置相匹配变得更加困难。如果原始源代码不小，建议使用此选项，因为辅助函数可以引起注意。

@@ -2,6 +2,7 @@ import { ApplicationModule } from "../Application";
 import { Pages } from "../Pages";
 import { checkRoute } from "../utils/route";
 import { waitForElement, waitFor, delay } from '../utils/wait'
+import { getWindow } from "../utils/window";
 
 export class TimesheetModule implements ApplicationModule {
   page = Pages.timesheet;
@@ -9,21 +10,27 @@ export class TimesheetModule implements ApplicationModule {
   scope: any = null
   async onLoad() {
     if (!checkRoute('/Fill_ByCalendar.aspx', this.page)) return this.unMounted()
-    if (!this.initialized) this.initModule()
+    this.initModule()
   }
   async initModule() {
+    if (this.initialized) return
     this.initialized = true
+    const window = getWindow()
     const angular = await waitFor(() => (window as any).angular)
     if (!angular) throw new Error('Missing angular object')
     const el = await waitForElement('.wrapper.ccontent.ng-scope')
     if (!el) throw new Error('Missing timesheet tab page element')
-    this.scope = await waitFor(() => angular.element(el).scope())
+    if (!this.scope) {
+      this.scope = await waitFor(() => angular.element(el).scope())
+    }
     console.warn('timesheet', this.scope)
     delay(1000).then(() => this.modifyWeekList())
     this.interceptNextAndRevious()
   }
   /** 更新日历组件中的 weekList 数据, 并触发 UI 层更新 */
   modifyWeekList() {
+    if (this.scope.LastLockedflag !== '0') return console.warn('本月工时可能已锁定, 不能提交')
+    const unlockedDates: Array<string> = []
     for (const row of this.scope.MetaData.ResultCalender.WeekList) {
       const satItem = row[row.length - 1]
       if (!Reflect.has(satItem, 'isWorkDay')) continue // 忽略非本月的日期
@@ -31,9 +38,11 @@ export class TimesheetModule implements ApplicationModule {
       if (satItem.isholiday !== 'True') {
         satItem.isWorkDay = 'True'
         satItem.isShow = '1'
+        unlockedDates.push(satItem.date)
         console.log('符合条件的周六', satItem)
       }
     }
+    this.scope.altMessage('已解锁符合条件的周六: ' + unlockedDates, 'gientech-helper-scropts 脚本 🤖')
     this.clickToUpdateElement()
   }
   clickToUpdateElement() {
@@ -45,6 +54,8 @@ export class TimesheetModule implements ApplicationModule {
     return waitFor(() => !document.querySelector('.loading-indicator-overlay'))
   }
   interceptNextAndRevious() {
+    console.log('interceptNextAndRevious')
+    if (this.scope._$next) return console.warn('ignore interceptNextAndRevious')
     const _this = this
     this.scope._$next = this.scope.next
     this.scope.next = function(...args: any[]) {
